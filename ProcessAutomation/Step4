@@ -1,0 +1,13 @@
+CUSTOM FIELD
+1. Add Custom Field Approved Boolean custom field
+2. Add field to page layout
+
+VALIDATION RULE
+Biggest_Deals_Validation : AND(Approved__c ==false, Amount >=1000,ISPICKVAL(StageName  , 'Closed Won'))
+
+SALES PROCESS
+1. Create new pickup list value
+2. Create New Sales Process & Add values
+
+RECORD TYPES
+Create new record type and add Sales Process
