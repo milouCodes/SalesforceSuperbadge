@@ -1,0 +1,28 @@
+Create validation rule:
+  1.  Rule Name:	Lead_must_be_located_in_US_state
+      Error Condition Formula: NOT((CONTAINS("AL:AK:AZ:AR:CA:CO:CT:DE:DC:FL:GA:HI:ID:IL:IN:IA:KS:KY:LA:ME:MD:MA:MI:MN:MS:MO:MT:NE:NV:NH:NJ:NM:NY:NC:ND:OH:OK:OR:PA:RI:SC:SD:TN:TX:UT:VT:VA:WA:WV:WI:WY", State)) ) || NOT((Country = "US") || (Country = "USA") || (Country ="United States") || ISBLANK(Country) )
+      Error Message: You can’t create non USA located leads
+      
+  2.  Rule Name: US_state_abbrevation
+      Error Condition Formula: LEN(State) <> 2
+      Error Message: Use the standard 2-character US state abbreviation in the State/Province field
+
+Create two queues for leads:
+  1.  Label: Assembly System Sales
+      Object: Lead
+      
+  2.  Label: Rainbow Sales
+      Object: Lead
+
+Create lead assignment rules:
+  1.  Make New Lead assignment rule named "Sales Teams"
+      Set to "Active"
+      
+  2.  Create new rule entries:
+      a.  Order: 1
+          Criteria: Lead: Lead Source EQUALS Web
+          Assign to: Rainbow Sales
+          
+      b.  Order: 2
+          Criteria: Lead: Lead SourceEQUALSPartner Referral,Purchased List
+          Assign: Assembly System Sales
