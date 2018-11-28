@@ -1,0 +1,129 @@
+APPROVAL PROCESS
+Create new Approval process on Opportunity object
+
+Process Name: High Value Opps 
+Unique Name: High_Value_Opps
+Active: Checked
+Next Automated Approver Determined By: Manager of Record Submitter
+Entry Criteria: Opportunity: Amount GREATER THAN 100000
+Record Editability: Administrator ONLY
+Allow Submitters to Recall Approval Requests: Not Checked
+Approval Assignment Email Template: SALES: Opportunity Needs Approval
+Initial Submitters Role and Subordinates: CEO, Opportunity Owner
+
+Initial Submission Actions
+1.  Record Lock: Lock the record from being edited
+2.  Field Update: Awaiting Approval
+    Field Update: Awaiting Approval
+    Unique Name: Awaiting_Approval
+    Object: Opportunity
+    Field to Update: Opportunity: Stage
+    Field Data Type: Picklist
+    Re-evaluate Workflow Rules after Field Change: Not Checked
+    New Field Value: Awaiting Approval
+    
+Approval steps
+Name: Step 1
+Assigned Approver: Manager
+Reject Behavior: Final Rejection
+
+Final Approval Actions
+1.  Record Lock: Lock the record from being edited
+2.  Alert: Opportunity Approved
+    Send email Sales: Opportunity approval status email
+3.  Update: Approved check
+    On the Approved checkbox field > set to true
+4.  Update: Approved
+    Update stage to Closed Won
+    
+Final Rejection actions
+1.  Record Lock: Unlock the record for editing
+2.  Field Update: Negotations
+    Update stage to Negotations/Review
+3.  Email Alert: Opportunity Rejected
+    Send email Sales: Opportunity approval status email
+
+
+PROCESS BUILDER
+Create new process:
+1.  The process name: Robot Setup
+2.  The process starts when: a record changes
+
+Object:
+1.  Object: Opportunity
+2.  Start the process: when a record is created or edit
+
+Criteria 1:
+Name: Customer
+Criteria for Executing Actions: Conditions are met
+
+Field:
+[Opportunity].Account.Type	EQUALS	Picklist	Customer – Direct
+[Opportunity].AccountId	DOES NOT EQUAL	Global Constant	$GlobalConstant.Null
+
+Immediate Actions 1:
+Action Type: Email Alert
+Action Name: Customer Account
+Email Alert: Finance_Alerts
+
+Criteria 2:
+Name: Prospect
+Criteria for Executing Actions: Conditions are met
+
+Field:	Operator:	Type:	Value:
+[Opportunity].Account.Type	EQUALS	Picklist	Prospect
+[Opportunity].AccountId	DOES NOT EQUAL	Global Constant	$GlobalConstant.Null
+
+Immediate Actions 2:
+Action Type: Email Alert
+Action Name: Finance Alert
+Email Alert: Finance_Alerts
+
+Action Type: Create Record
+Record Type: Task
+Action Name: Send Marketing Materials
+
+Field:	Operator:	Value:
+Assigned to ID	Field Reference	[Opportunity].OwnerId
+Priority	Picklist	High
+Subject	String	Send Marketing Materials
+Related To ID	Field Reference	[Opportunity].Id
+
+Criteria 3:
+Name: High Value Opps
+Criteria for Executing Actions: Conditions are met
+Conditions: All of the conditions are met (AND)
+
+Field:	Operator:	 Type:	Value:
+[Opportunity].StageName	EQUALS	Picklist	Negotiation/Review
+[Opportunity].Amount	GREATER THAN	Curency	100 000
+
+Immediate Actions 3:
+Action Type: Submit for Approval
+Action Name: Approval
+Object: Opportunity
+Approval Process: High-Value Opps – High_Value_Opps
+Submitter: Current User
+
+Criteria 4:
+The last one – we need to Alert the Finance fro the Won Opportunity
+
+Name: Opportunity Won  
+Criteria for Executing Actions: Conditions are met
+
+Field:	Operator:	 Type:	Value:
+[Opportunity].StageName	EQUALS	Picklist	Closed Won
+
+Immediate Actions 3:
+Action Type: Email Alert
+Action Name: Finance Alert
+Email Alert: Finance_Alerts
+
+Immediate Actions 4:
+Action Type: Create Record
+Record Type: Robot Setup
+Action Name: Robot Setup
+
+Field:	Operator:	Value:
+Opportunity	Field Reference	[Opportunity].Id
+Date	Formula	[Opportunity].CloseDate + 180
